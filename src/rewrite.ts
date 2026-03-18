@@ -1,23 +1,42 @@
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM_PROMPT } from './prompt.js';
 import { validate, type ValidationResult } from './validate.js';
 import { stripCodeFence } from './utils.js';
+
+export const DEFAULT_MODEL = 'opus';
 
 export const MODELS: Record<string, string> = {
   sonnet: 'claude-sonnet-4-20250514',
   opus: 'claude-opus-4-20250514',
 };
 
+function loadApiKey(): string {
+  // Check env first
+  if (process.env.ANTHROPIC_API_KEY) {
+    return process.env.ANTHROPIC_API_KEY;
+  }
+
+  // Fallback: ~/.config/anthropic/.env
+  const envPath = path.join(os.homedir(), '.config', 'anthropic', '.env');
+  if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, 'utf8');
+    const match = content.match(/^ANTHROPIC_API_KEY=(.+)$/m);
+    if (match) return match[1].trim();
+  }
+
+  console.error('Missing ANTHROPIC_API_KEY. Set it in your environment or in ~/.config/anthropic/.env');
+  process.exit(1);
+}
+
 export async function processPost(
   content: string,
   model: string,
   maxRetries = 3
 ): Promise<{ text: string; result: ValidationResult }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.error('Missing ANTHROPIC_API_KEY environment variable');
-    process.exit(1);
-  }
+  const apiKey = loadApiKey();
 
   const anthropic = new Anthropic({ apiKey });
 

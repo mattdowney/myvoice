@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
-import { processPost, MODELS } from './rewrite.js';
+import { processPost, MODELS, DEFAULT_MODEL } from './rewrite.js';
 
 function usage(): never {
   console.error(`Usage: myvoice <file> [options]
@@ -9,7 +9,7 @@ function usage(): never {
 Options:
   -o <path>      Write output to file
   --in-place     Overwrite the input file
-  --model <name> Model to use: sonnet (default), opus
+  --model <name> Model to use: opus (default), sonnet
   -              Read from stdin
 
 Examples:
@@ -38,8 +38,8 @@ async function main() {
   // Parse flags
   const inPlace = args.includes('--in-place');
   const modelFlag = args.includes('--model');
-  const modelName = modelFlag ? args[args.indexOf('--model') + 1] : 'sonnet';
-  const model = MODELS[modelName] || MODELS.sonnet;
+  const modelName = modelFlag ? args[args.indexOf('--model') + 1] : DEFAULT_MODEL;
+  const model = MODELS[modelName] || MODELS[DEFAULT_MODEL];
 
   let outputPath: string | null = null;
   if (args.includes('-o')) {
