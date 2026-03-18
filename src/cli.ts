@@ -1,23 +1,33 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
+import path from 'path';
 import { processPost, MODELS, DEFAULT_MODEL } from './rewrite.js';
 
 function usage(): never {
   console.error(`Usage: myvoice <file> [options]
 
 Options:
-  -o <path>      Write output to file
-  --in-place     Overwrite the input file
+  -o <path>      Write output to specific file
+  --in-place     Overwrite the original file
   --model <name> Model to use: opus (default), sonnet
-  -              Read from stdin
+  -              Read from stdin (outputs to stdout)
+
+Default behavior writes to a .voice.md sibling file for review.
 
 Examples:
-  myvoice post.md                   # Output to stdout
-  myvoice post.md -o rewritten.md   # Write to file
-  myvoice post.md --in-place        # Overwrite original
-  cat post.md | myvoice -           # Read from stdin`);
+  myvoice post.md                   # Creates post.voice.md
+  myvoice post.md --in-place        # Overwrites post.md
+  myvoice post.md -o rewritten.md   # Write to specific file
+  cat post.md | myvoice -           # stdin -> stdout`);
   process.exit(1);
+}
+
+function voicePath(filePath: string): string {
+  const dir = path.dirname(filePath);
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath, ext);
+  return path.join(dir, `${base}.voice${ext}`);
 }
 
 async function readStdin(): Promise<string> {
@@ -106,8 +116,14 @@ async function main() {
   } else if (outputPath) {
     fs.writeFileSync(outputPath, text);
     process.stderr.write(`Wrote ${outputPath}\n`);
-  } else {
+  } else if (inputFile === '-') {
     process.stdout.write(text);
+  } else {
+    const out = voicePath(inputFile);
+    fs.writeFileSync(out, text);
+    process.stderr.write(`Wrote ${out}\n`);
+    process.stderr.write(`Review: diff ${inputFile} ${out}\n`);
+    process.stderr.write(`Apply:  mv ${out} ${inputFile}\n`);
   }
 }
 
