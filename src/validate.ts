@@ -142,9 +142,9 @@ export function validate(original: string, rewritten: string): ValidationResult 
   const origWords = original.split(/\s+/).length;
   const rewriteWords = rewritten.split(/\s+/).length;
   const ratio = rewriteWords / origWords;
-  if (ratio < 0.5) {
+  if (ratio < 0.75) {
     warnings.push(`Word count too low: ${rewriteWords} vs ${origWords} (${Math.round(ratio * 100)}%)`);
-  } else if (ratio > 1.5) {
+  } else if (ratio > 1.2) {
     warnings.push(`Word count too high: ${rewriteWords} vs ${origWords} (${Math.round(ratio * 100)}%)`);
   }
 

@@ -91,5 +91,5 @@ After rewriting, go through the original line by line and verify ALL of these ar
 - If the input has no frontmatter, just return the rewritten prose
 - No explanation, no preamble, no commentary
 - No code fence wrapper
-- Word count can be 50-150% of original (you have room to restructure)
+- Word count should be 75-120% of original. Brevity is good, but never cut content that provides clarity, context, or useful detail. If a section explains something the reader needs to understand, keep it. Cut filler, not substance.
 - Every heading in sentence case`;
